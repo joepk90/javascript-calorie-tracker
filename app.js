@@ -12,9 +12,9 @@ const itemController = (function() {
   // Data Structure / State
   const data = {
     items: [
-      {id: 0, name: 'Steak Dinner', calories: 1200},
-      {id: 1, name: 'Cookie', calories: 300},
-      {id: 2, name: 'Eggs', calories: 300}
+      // {id: 0, name: 'Steak Dinner', calories: 1200},
+      // {id: 1, name: 'Cookie', calories: 300},
+      // {id: 2, name: 'Eggs', calories: 300}
     ],
     currentItem: null,
     totalCalories: 0
@@ -52,6 +52,9 @@ const itemController = (function() {
 })();
 
 
+
+
+
 // UI CONTROLLER
 const UIController = (function() {
 
@@ -86,12 +89,39 @@ const UIController = (function() {
         calories: document.querySelector(UISelectors.ItemCaloriesInput).value
       }
     },
+    addListItem: function(item) {
+      // Show the List
+        document.querySelector(UISelectors.itemList).style.display = 'block';
+      // Create li element
+      const li = document.createElement('li');
+
+      li.className = 'collection-item';
+      li.id = `item-${item.id}`;
+      li.innerHTML = `
+        <strong>${item.name}: </strong> <em>${item.calories} Calories</em>
+        <a href="#" class="secondary-content">
+          <i class="edit-item fa fa-pencil"></i>
+        </a>
+      `;
+
+      document.querySelector(UISelectors.itemList).insertAdjacentElement('beforeend', li);
+    },
+    clearInput: function() {
+      document.querySelector(UISelectors.itemNameInput).value = '';
+      document.querySelector(UISelectors.ItemCaloriesInput).value = '';
+    },
+    hideList: function(){
+      document.querySelector(UISelectors.itemList).style.display = 'none';
+    },
     getSelectors: function() {
        return UISelectors;
     }
   }
 
 })();
+
+
+
 
 
 // APP CONTROLLER
@@ -113,8 +143,14 @@ const App = (function(itemController, UIController) {
 
     // Check name and calorie inputs are populated
     if(input.name !== '' && input.calories !== '') {
-      const newItem = itemController.addItem(input.name, input.calories)
+      const newItem = itemController.addItem(input.name, input.calories);
+      // Add Item to UI list
+      UIController.addListItem(newItem);
     }
+
+    // Clear Fields
+    UIController.clearInput();
+
     e.preventDefault();
   }
 
@@ -128,7 +164,13 @@ const App = (function(itemController, UIController) {
       console.log('Initializing App');
       console.log(items);
 
-      UIController.populateItemList(items);
+      if(items.length === 0) {
+        UIController.hideList();
+      } else {
+        UIController.populateItemList(items);
+      }
+
+
 
       // Load Event Listeners
       loadEventListeners();
