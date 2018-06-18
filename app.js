@@ -59,6 +59,21 @@ const itemController = (function() {
       });
       return found;
     },
+    updateItem: function(name, calories) {
+      // Calories to number
+      calories = parseInt(calories);
+
+      let found = null;
+      data.items.forEach(function(item) {
+        if(item.id === data.currentItem.id) {
+          item.name = name;
+          item.calories = calories
+          found = item;
+        }
+
+      })
+
+    },
     setCurrentItem: function(item) {
       data.currentItem = item;
     },
@@ -192,9 +207,22 @@ const App = (function(itemController, UIController) {
     // Add Item Event
     document.querySelector(UISelectors.addBtn).addEventListener('click', itemAddSubmit);
 
+    // Disable Submit On Enter
+    document.addEventListener('keypress', function(e) {
+
+      // Disable Enter Key (13 = Enter Key)
+      // e.which is add for older browser compatibility
+      if(e.keyCode === 13 || e.which === 13) {
+        e.preventDefault();
+        return false;
+      }
+    });
+
     // Edit Icon Click
     document.querySelector(UISelectors.itemList).addEventListener('click', itemEditClick);
 
+    // Update item Event
+    document.querySelector(UISelectors.updateBtn).addEventListener('click', itemUpdateSubmit);
   }
 
   // Add Item Submit
@@ -221,7 +249,7 @@ const App = (function(itemController, UIController) {
     e.preventDefault();
   }
 
-  // Update Item Submit
+  // Item Edit Click
   const itemEditClick = function(e) {
 
     if(e.target.classList.contains('edit-item')) {
@@ -246,6 +274,18 @@ const App = (function(itemController, UIController) {
     UIController.addItemToForm();
 
     }
+
+    e.preventDefault();
+  }
+
+  //Update Item Submit
+  const itemUpdateSubmit = function(e) {
+
+    // Get Item input
+    const input = UIController.getItemInput();
+
+    // Update Item
+    const updatedItem = itemController.updateItem(input.name, input.calories);
 
     e.preventDefault();
   }
