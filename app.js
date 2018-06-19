@@ -70,9 +70,8 @@ const itemController = (function() {
           item.calories = calories
           found = item;
         }
-
       })
-
+      return found;
     },
     setCurrentItem: function(item) {
       data.currentItem = item;
@@ -105,6 +104,7 @@ const UIController = (function() {
 
   const UISelectors = {
     itemList: '#item-list',
+    listItems: '#item-list li',
     addBtn: '.add-btn',
     updateBtn: '.update-btn',
     deleteBtn: '.delete-btn',
@@ -147,13 +147,33 @@ const UIController = (function() {
       li.className = 'collection-item';
       li.id = `item-${item.id}`;
       li.innerHTML = `
-      <strong>${item.name}: </strong> <em>${item.calories} Calories</em>
-      <a href="#" class="secondary-content">
-      <i class="edit-item fa fa-pencil"></i>
-      </a>
+        <strong>${item.name}: </strong> <em>${item.calories} Calories</em>
+        <a href="#" class="secondary-content">
+        <i class="edit-item fa fa-pencil"></i>
+        </a>
       `;
 
       document.querySelector(UISelectors.itemList).insertAdjacentElement('beforeend', li);
+    },
+    updateListItem: function(item) {
+      let listItems = document.querySelectorAll(UISelectors.listItems);
+
+      // Turn node list into Array
+      listItems = Array.from(listItems);
+
+      listItems.forEach(function(listItem) {
+        const itemID = listItem.getAttribute('id');
+
+        if(itemID === `item-${item.id}`) {
+          document.querySelector(`#${itemID}`).innerHTML = `
+            <strong>${item.name}: </strong> <em>${item.calories} Calories</em>
+            <a href="#" class="secondary-content">
+            <i class="edit-item fa fa-pencil"></i>
+            </a>
+          `
+        }
+
+      })
     },
     clearInput: function() {
       document.querySelector(UISelectors.itemNameInput).value = '';
@@ -221,8 +241,10 @@ const App = (function(itemController, UIController) {
     // Edit Icon Click
     document.querySelector(UISelectors.itemList).addEventListener('click', itemEditClick);
 
-    // Update item Event
+    // Update Item Event
     document.querySelector(UISelectors.updateBtn).addEventListener('click', itemUpdateSubmit);
+
+  
   }
 
   // Add Item Submit
@@ -287,8 +309,21 @@ const App = (function(itemController, UIController) {
     // Update Item
     const updatedItem = itemController.updateItem(input.name, input.calories);
 
+    // Update UI
+    UIController.updateListItem(updatedItem);
+
+    // Get Total Calories
+    const totalCalories = itemController.getTotalCalories();
+
+    // Update Total Calories UI
+    UIController.showTotalCalories(totalCalories);
+
+    UIController.clearEditState();
+
     e.preventDefault();
   }
+
+  // Go Back
 
   // Public Methods
   return {
